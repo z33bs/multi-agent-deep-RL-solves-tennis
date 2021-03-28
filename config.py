@@ -58,15 +58,15 @@ class Config(object):
         self.actor = NetworkConfig(
             input_size=self.environment.state_size,
             output_size=self.environment.action_size,
-            hidden_sizes=[256, 256],
+            hidden_sizes=[256, 128],
             lr=1e-3,
             output_activation=F.tanh
         )
         self.critic = NetworkConfig(
             input_size=(self.environment.state_size + self.environment.action_size) * self.environment.number_of_agents,
             output_size=1,
-            hidden_sizes=[512],
-            lr=1e-4,
+            hidden_sizes=[512, 256],
+            lr=1e-3,
             output_activation=None
         )
 
