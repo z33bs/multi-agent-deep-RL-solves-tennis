@@ -16,7 +16,6 @@ class DDPGAgent():
         random.seed(config.general.seed)
         np.random.seed(config.general.seed)
 
-        self.noise = OUNoise(config)
         self.index = index
         self.action_size = config.environment.action_size
         self.tau = config.hyperparameters.tau
@@ -28,13 +27,11 @@ class DDPGAgent():
         self.critic_target = Network(config.critic, config.general.seed)
         self.critic_optimizer = Adam(self.critic_local.parameters(), lr=config.critic.lr, weight_decay=config.hyperparameters.weight_decay)
 
-    def act(self, state, noise, random):
+    def act(self, state, random):
         self.actor_local.eval()
         with torch.no_grad():
             action = self.actor_local(torch.from_numpy(state).float().to(device)).cpu().data.numpy()
         self.actor_local.train()
-        if noise is not None:
-            action += self.noise.sample() * noise
         if random is not None:
             action = (1 - random) * action + random * (np.random.rand(self.action_size) - 0.5) * 2.0
         return np.clip(action, -1, 1)

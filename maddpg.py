@@ -49,10 +49,10 @@ class MADDPGAgent():
             experiences = [self.memory.sample() for _ in range(self.number_of_agents)]
             self.learn(experiences, self.gamma)
 
-    def act(self, all_states, add_noise=True, random=0.0):
+    def act(self, all_states, random):
         all_actions = []
         for agent, state in zip(self.agents, all_states):
-            action = agent.act(state, noise=self.noise_weight if add_noise else 0.0, random=random)
+            action = agent.act(state, random=random)
             self.noise_weight *= self.noise_decay
             all_actions.append(action)
         return np.array(all_actions).reshape(1, -1)

@@ -10,6 +10,8 @@ def training_loop(env, brain_name, agent, config):
     avg_scores = []
     # writer = SummaryWriter()
     last_max = -math.inf
+    rand = 1.0
+    rand_decay = 0.9977
 
     for e in range(1, config.training.episode_count):
 
@@ -18,12 +20,16 @@ def training_loop(env, brain_name, agent, config):
         state = env_info.vector_observations
 
         for t in range(config.training.max_t):
-            rand = 0
+            # rand = 0
+            # elif e < 2000:
+            #     rand = 0.5
+            action = agent.act(state, rand)
+
+            # Complete exploration for first 1000 episodes to get ball over net
             if e < 1000:
                 rand = 1.0
-            elif e < 2000:
-                rand = 0.5
-            action = agent.act(state, False, rand)
+            else:  # Thereafter decay with each episode
+                rand = rand * rand_decay
 
             env_info = env.step(action)[brain_name]
             next_state = env_info.vector_observations
