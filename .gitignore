@@ -127,3 +127,7 @@ __pycache__/
 models/
 Tennis.app
 
+
+log/
+
+.DS_Store

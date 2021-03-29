@@ -1,59 +1,51 @@
-import random
-import copy
 import os
-
 import numpy as np
 import torch
-import torch.nn.functional as F
-import torch.optim as optim
-
-from network import Network
-from utils import ReplayBuffer, critic_input
+from buffer import ReplayBuffer
 from ddpgagent import DDPGAgent
-from config import device
+
+BUFFER_SIZE = int(1E5)
+BATCH_SIZE = 128
+UPDATE_FREQUENCY = 2
+GAMMA = .99
+NUM_AGENTS = 2
+DEVICE = 'cpu'
 
 
 class MADDPGAgent():
+    def __init__(self, seed, checkpoint_filename=None):
 
-    def __init__(self, config, file_prefix=None):
-
-        self.buffer_size = config.hyperparameters.buffer_size
-        self.batch_size = config.hyperparameters.batch_size
-        self.update_frequency = config.hyperparameters.update_frequency
-        self.gamma = config.hyperparameters.gamma
-        self.number_of_agents = config.environment.number_of_agents
-        self.noise_weight = config.hyperparameters.noise_start
-        self.noise_decay = config.hyperparameters.noise_decay
-        self.memory = ReplayBuffer(config)
+        self.memory = ReplayBuffer(BUFFER_SIZE, BATCH_SIZE, DEVICE, seed)
         self.t = 0
 
-        self.agents = [DDPGAgent(index, config) for index in range(self.number_of_agents)]
+        self.agents = [DDPGAgent(index, NUM_AGENTS, seed, DEVICE) for index in range(NUM_AGENTS)]
 
-        if file_prefix:
+        if checkpoint_filename:
             for i, to_load in enumerate(self.agents):
-                f"{os.getcwd()}/models/by_score/{file_prefix}_actor_{i}.weights"
-                actor_file = torch.load(f"{os.getcwd()}/models/by_score/{file_prefix}_actor_{i}.weights", map_location='cpu')
-                critic_file = torch.load(f"{os.getcwd()}/models/by_score/{file_prefix}_critic_{i}.weights", map_location='cpu')
+                f"{os.getcwd()}/models/{checkpoint_filename}_actor_{i}.weights"
+                actor_file = torch.load(f"{os.getcwd()}/models/{checkpoint_filename}_actor_{i}.weights"
+                                        , map_location=DEVICE)
+                critic_file = torch.load(f"{os.getcwd()}/models/{checkpoint_filename}_critic_{i}.weights"
+                                         , map_location=DEVICE)
                 to_load.actor_local.load_state_dict(actor_file)
                 to_load.actor_target.load_state_dict(actor_file)
                 to_load.critic_local.load_state_dict(critic_file)
                 to_load.critic_target.load_state_dict(critic_file)
-            print(f'Files loaded with prefix {file_prefix}')
+            print(f'Files loaded with prefix {checkpoint_filename}')
 
     def step(self, all_states, all_actions, all_rewards, all_next_states, all_dones):
-        all_states = all_states.reshape(1, -1) 
+        all_states = all_states.reshape(1, -1)
         all_next_states = all_next_states.reshape(1, -1)
         self.memory.add(all_states, all_actions, all_rewards, all_next_states, all_dones)
-        self.t = (self.t + 1) % self.update_frequency
-        if self.t == 0 and (len(self.memory) > self.batch_size):
-            experiences = [self.memory.sample() for _ in range(self.number_of_agents)]
-            self.learn(experiences, self.gamma)
+        self.t = (self.t + 1) % UPDATE_FREQUENCY
+        if self.t == 0 and (len(self.memory) > BATCH_SIZE):
+            experiences = [self.memory.sample() for _ in range(NUM_AGENTS)]
+            self.learn(experiences, GAMMA)
 
     def act(self, all_states, random):
         all_actions = []
         for agent, state in zip(self.agents, all_states):
             action = agent.act(state, random=random)
-            self.noise_weight *= self.noise_decay
             all_actions.append(action)
         return np.array(all_actions).reshape(1, -1)
 
@@ -62,7 +54,7 @@ class MADDPGAgent():
         all_next_actions = []
         for i, agent in enumerate(self.agents):
             states, _, _, next_states, _ = experiences[i]
-            agent_id = torch.tensor([i]).to(device)
+            agent_id = torch.tensor([i]).to(DEVICE)
             state = states.reshape(-1, 2, 24).index_select(1, agent_id).squeeze(1)
             next_state = next_states.reshape(-1, 2, 24).index_select(1, agent_id).squeeze(1)
             all_actions.append(agent.actor_local(state))
