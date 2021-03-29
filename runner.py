@@ -48,7 +48,7 @@ def train(env, agent):
 
             reward, next_state, done = env.transition(action)
 
-            if any(r == 0.1 for r in reward):
+            if any(r > 0.0 for r in reward):
                 good_shots += 1
 
             agent.step(state, action, reward, next_state, done)
