@@ -60,6 +60,7 @@ def train(env, agent):
 
         # after every episode...
         scores.append(sum(np.array(rewards).sum(1)))
+        np.save('scores', scores)
         avg_scores.append(sum(scores[-100:]) / 100)
         good_shots_last_100e.append(good_shots)
 

@@ -133,3 +133,5 @@ log/
 .DS_Store
 
 md.assets/
+
+*.npy
