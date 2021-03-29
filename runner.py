@@ -99,26 +99,36 @@ def save(agent, tag):
 
 def play(env, agent, playthrougs=10):
     for e in range(playthrougs):
-        state, _, _ = env.reset()
+        state, _, _ = env.reset(train_mode=False)
         is_done = False
 
+        total_max_reward = 0
         while not is_done:
-            reward, state, done = env.transition(agent.act(state, random=0))
+            reward, n_state, done = env.transition(agent.act(state, random=None))
+            state = n_state
+            total_max_reward = np.array(reward).max()
             is_done = any(done)
+
+        print(f'P:{e}   Score:{total_max_reward}')
 
 
 def plot_scores(path):
     losses = np.genfromtxt(path)
-    losses = losses[~np.isnan(losses)].reshape(-1, 3)
-    fig, ax = plt.subplots()
+    losses = losses[~np.isnan(losses)].reshape(-1, 5)
     losses = np.array(losses)
-    plt.plot(losses.T[1], label='Score', alpha=0.5)
-    plt.plot(losses.T[2], label='100 episode average', alpha=0.5)
-    plt.plot([30] * len(losses), label='Target')
-    plt.title("Average Score over 20 agents")
-    plt.ylabel('Score')
-    plt.xlabel('Episode #')
-    plt.legend()
+
+    fig, axs = plt.subplots(1, 2)
+    for i in range(2):
+        axs[i].plot(losses.T[0], losses.T[1], label='Avg. Score', alpha=0.5)
+        axs[i].plot(losses.T[0], losses.T[2], label='Max Avg. Score', alpha=0.5)
+        axs[i].plot(losses.T[0], [0.5] * len(losses), label='Target')
+        if i == 0:
+            axs[i].set(yscale='log', xlabel='Episode #', ylabel='Score (log scale)')
+        else:
+            axs[i].set(xlabel='Episode #', ylabel='Score')
+        axs[i].legend()
+
+    fig.suptitle("Average Score for both agents over 100 episodes")
     plt.show()
 
 
