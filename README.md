@@ -59,14 +59,6 @@ for other operating systems, run with the name of your environment file that you
 python agent_runner.py --env '<environment filename>'
 ```
 
-For runner options use the `--help` flag. For example, you can view the trained agent with
-
-#### Play
-
-```bash
-python agent_runner.py --mode 'play' --load 'final'
-```
-
 #### Plot
 
 Plot training scores from logfile with
