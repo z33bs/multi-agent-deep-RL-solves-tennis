@@ -20,10 +20,10 @@ EPISODE_COUNT = 5000
 MAX_T = 2000
 SOLVE_SCORE = 0.5
 CONTINUE_AFTER_SOLVE = True
-ACT_PERCENT_RANDOMNESS = 1.0
+ACT_PERCENT_RANDOMNESS = 0.90
 RANDOMNESS_DECAY = 0.9977
-RANDOMNESS_DECAY_AFTER = 1000
-
+# RANDOMNESS_DECAY_AFTER = 1000
+RANDOMNESS_SHOTS_HURDLE = 0.2
 
 def train(env, agent):
     log = Logger()
@@ -43,8 +43,6 @@ def train(env, agent):
             action = agent.act(state, randomness)
             # Complete exploration for first 1000 episodes to get ball over net
             # Thereafter decay with each episode
-            if e > RANDOMNESS_DECAY_AFTER:
-                randomness = randomness * RANDOMNESS_DECAY
 
             reward, next_state, done = env.transition(action)
 
@@ -60,15 +58,22 @@ def train(env, agent):
 
         # after every episode...
         scores.append(sum(np.array(rewards).sum(1)))
-        np.save('scores', scores)
+        np.save('log/scores', scores)
         avg_scores.append(sum(scores[-100:]) / 100)
         good_shots_last_100e.append(good_shots)
+
+        # if e > RANDOMNESS_DECAY_AFTER:
+        if np.mean(good_shots_last_100e) > RANDOMNESS_SHOTS_HURDLE:
+            randomness = randomness * RANDOMNESS_DECAY
+        elif randomness < ACT_PERCENT_RANDOMNESS:
+            randomness = randomness / RANDOMNESS_DECAY
 
         print(
             f'E: {e:6} | Average: {avg_scores[-1]:10.4f} | '
             f'Best average: {max(avg_scores):10.4f} | '
             f'Last score: {scores[-1]:10.4f} | '
-            f'Good shots: {good_shots}',
+            f'Good shots: {good_shots} | '
+            f'Randomness: {randomness:.3f}',
             end='\r')
 
         if avg_scores[-1] > last_max:
@@ -87,7 +92,8 @@ def train(env, agent):
                 f'E: {e:6} | Average: {avg_scores[-1]:10.4f} | '
                 f'Best average: {max(avg_scores):10.4f} | '
                 f'Last score: {scores[-1]:10.4f} | '
-                f'Good shots avg: {np.mean(good_shots_last_100e)}')
+                f'Good shots avg: {np.mean(good_shots_last_100e)} | '
+                f'Randomness: {randomness:.3f}')
 
 
 def save(agent, tag):
