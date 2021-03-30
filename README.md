@@ -13,7 +13,7 @@ The task is episodic, and in order to solve the environment, your agents must ge
 
 The environment is considered solved, when the average (over 100 episodes) of those **scores** is at least +0.5.
 
-![tennis environment](md.assets/tennis.png)
+![tennis environment](md.assets/trained_agents.gif)
 
 ## Installation
 

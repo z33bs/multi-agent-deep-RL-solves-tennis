@@ -57,6 +57,10 @@ Figure below shows a plot of the score over time. The network performed extremel
 
 ![score over time](md.assets/score.png)
 
+The clip below shows the trained agents playing:
+
+![trained agents playing](md.assets/trained_agents.gif)
+
 ## Future work
 
 I believe prioritized experience replay would help the network learn faster. This would be my first addition.
