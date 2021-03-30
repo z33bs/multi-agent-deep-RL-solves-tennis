@@ -53,7 +53,7 @@ My final model used the following hyper parameters:
 
 ## Results
 
-Figure below shows a plot of the score over time. The network performed extremely well, first exceeding an average score of 0.5 before 2800 episodes. The network continued to improve with further training, achieving a maximum average of 3.6 by episode 3800. Training appeared to plateau at this point, but remained stable which I am happy about.
+Figure below shows a plot of the score over time. The network performed extremely well, first exceeding an average score of 0.5 at 3600 episodes. The network continued to improve with further training, achieving a maximum average of 3.6. Training appeared to plateau at this point, but remained stable which I am happy about.
 
 ![score over time](md.assets/score.png)
 
