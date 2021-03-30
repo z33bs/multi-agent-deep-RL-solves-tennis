@@ -27,7 +27,7 @@ class DDPGAgent():
         self.actor_optimizer = Adam(self.actor_local.parameters(), lr=ACTOR_LR)
         self.critic_local = Network(num_agents * (STATE_SIZE + ACTION_SIZE), CRITIC_HIDDEN_DIMS, 1, None, seed)
         self.critic_target = Network(num_agents * (STATE_SIZE + ACTION_SIZE), CRITIC_HIDDEN_DIMS, 1, None, seed)
-        self.critic_optimizer = Adam(self.critic_local.parameters(), lr=CRITIC_LR)
+        self.critic_optimizer = Adam(self.critic_local.parameters(), lr=CRITIC_LR, weight_decay=0)
 
     def act(self, state, random):
         self.actor_local.eval()

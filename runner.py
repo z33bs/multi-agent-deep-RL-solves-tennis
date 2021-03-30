@@ -121,7 +121,7 @@ def play(env, agent, playthrougs=10):
 
 def plot_scores(path):
     losses = np.genfromtxt(path)
-    losses = losses[~np.isnan(losses)].reshape(-1, 5)
+    losses = losses[~np.isnan(losses)].reshape(-1, 6)
     losses = np.array(losses)
 
     fig, axs = plt.subplots(1, 2)
